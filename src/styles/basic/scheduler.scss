@@ -1,0 +1,108 @@
+$grey-light-100: #fafbfc;
+$grey-light-200: #f4f5f7;
+$grey-light-300: #ebecf0;
+$grey-light-400: #dfe1e6;
+$grey-light-500: #cbd0d7;
+$grey-light-600: #aeb6c1;
+$grey-dark-100: #8e969f;
+$grey-dark-200: #6e7781;
+$grey-dark-400: #485560;
+$grey-dark-600: #27343b;
+
+$shadow-500: 0px 12px 25px rgba(0, 0, 0, 0.1), 0px 0px 10px rgba(0, 0, 0, 0.04);
+
+$cell-height: 3rem;
+
+.scheduler {
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande',
+    'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.scheduler__day-label {
+  border-left: 1px solid transparent;
+}
+
+.scheduler__day-of-week {
+  text-transform: uppercase;
+  font-size: small;
+  color: $grey-dark-200;
+  padding: 0.25rem;
+}
+
+.scheduler__day-of-month {
+  display: block;
+  font-size: x-large;
+  color: $grey-dark-600;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  border: 2px solid transparent;
+
+  cursor: pointer;
+  position: relative;
+
+  &:after {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    z-index: -1;
+    border: 4px solid transparent;
+  }
+
+  &:hover:after {
+    background-color: $grey-light-200;
+  }
+}
+
+.scheduler__day-label--today {
+  .scheduler__day-of-week {
+    color: blueviolet;
+  }
+
+  .scheduler__day-of-month {
+    color: white;
+
+    &:after {
+      background-color: blueviolet;
+    }
+  }
+}
+
+.scheduler__daytime-label {
+  min-width: 5rem;
+  height: $cell-height;
+  border-top: 1px solid transparent;
+  padding-right: 1rem;
+  font-size: x-small;
+  color: $grey-dark-200;
+
+  &:first-of-type {
+    // display: none;
+    opacity: 0;
+  }
+}
+
+.scheduler__grid-row {
+  border-top: 1px solid $grey-light-300;
+
+  &:first-of-type {
+    border-top: 1px solid transparent;
+  }
+}
+
+.scheduler__grid-cell {
+  border-left: 1px solid $grey-light-500;
+  height: $cell-height;
+
+  &:first-of-type {
+    border-left: 1px solid transparent;
+  }
+
+  &:hover {
+    background: $grey-light-100;
+    cursor: pointer;
+  }
+}

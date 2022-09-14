@@ -1,0 +1,77 @@
+.scheduler {
+  display: grid;
+  align-items: stretch;
+
+  grid-template-columns: min-content auto;
+  grid-template-rows: min-content auto;
+  grid-template-areas:
+    'blank header'
+    'labels grid';
+}
+
+.scheduler__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.scheduler__header {
+  grid-area: header;
+}
+
+.scheduler__day-labels {
+  display: flex;
+  justify-content: center;
+}
+
+.scheduler__day-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.scheduler__daytime-labels {
+  grid-area: labels;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+}
+
+.scheduler__daytime-label {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  transform: translateY(-50%);
+}
+
+.scheduler__grid {
+  grid-area: grid;
+  display: flex;
+  flex-direction: column;
+
+  overflow: scroll;
+
+  position: relative;
+}
+
+.scheduler__grid-row {
+  flex: 1;
+  display: flex;
+  justify-content: stretch;
+}
+
+.scheduler__grid-cell {
+  flex: 1;
+}
+
+.scheduler__now {
+  height: 2px;
+  background-color: black;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
