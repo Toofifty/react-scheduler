@@ -1,21 +1,14 @@
-$grey-light-100: #fafbfc;
-$grey-light-200: #f4f5f7;
-$grey-light-300: #ebecf0;
-$grey-light-400: #dfe1e6;
-$grey-light-500: #cbd0d7;
-$grey-light-600: #aeb6c1;
-$grey-dark-100: #8e969f;
-$grey-dark-200: #6e7781;
-$grey-dark-400: #485560;
-$grey-dark-600: #27343b;
+@import './var.scss';
 
-$shadow-500: 0px 12px 25px rgba(0, 0, 0, 0.1), 0px 0px 10px rgba(0, 0, 0, 0.04);
-
-$cell-height: 3rem;
+$cell-height: 4rem;
 
 .scheduler {
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande',
     'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+
+  * {
+    box-sizing: border-box;
+  }
 }
 
 .scheduler__day-label {
@@ -85,7 +78,15 @@ $cell-height: 3rem;
   }
 }
 
-.scheduler__grid-row {
+.scheduler__grid-column {
+  border-left: 1px solid $grey-light-500;
+
+  &:first-of-type {
+    border-left: 1px solid transparent;
+  }
+}
+
+.scheduler__grid-cell {
   border-top: 1px solid $grey-light-300;
 
   &:first-of-type {
@@ -93,16 +94,34 @@ $cell-height: 3rem;
   }
 }
 
-.scheduler__grid-cell {
-  border-left: 1px solid $grey-light-500;
-  height: $cell-height;
+.scheduler__grid-interactive {
+  cursor: pointer;
+}
 
-  &:first-of-type {
-    border-left: 1px solid transparent;
-  }
+.scheduler__grid-interactive-cell {
+  margin: 1px;
+  margin-left: 2px;
+  margin-top: 2px;
 
   &:hover {
-    background: $grey-light-100;
+    background: $grey-light-300;
+    border-radius: 4px;
     cursor: pointer;
+  }
+}
+
+.scheduler__now {
+  background-color: blueviolet;
+
+  &:after {
+    $size: 0.5rem;
+    content: '';
+    position: absolute;
+    left: -$size * 0.5;
+    top: calc(-#{$size * 0.5} + 50%);
+    height: $size;
+    width: $size;
+    background-color: blueviolet;
+    border-radius: 100%;
   }
 }

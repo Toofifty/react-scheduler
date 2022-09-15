@@ -1,28 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   addDays,
   addMinutes,
-  isEqual,
+  isSameDay,
   setHours,
   startOfDay,
   startOfWeek,
 } from 'date-fns';
-
-const pipe =
-  <T>(x: T) =>
-  (...fns: ((v: T) => T)[]) =>
-    fns.reduce((v, f) => f(v), x);
-
-const pipable = {
-  setHours: (n: number) => (d: Date) => setHours(d, n),
-  addMinutes: (n: number) => (d: Date) => addMinutes(d, n),
-};
-
-const pip =
-  <T, A>(fn: (x: T, ...args: A[]) => T) =>
-  (...args: A[]) =>
-  (x: T) =>
-    fn(x, ...args);
+import { getTotalMinutes, pipable, pipe } from '../util';
+import { SchedulerEvent } from './types';
 
 export const useDaysOfWeek = (start: Date, weekStartsOn: Day) =>
   useMemo(() => {
@@ -42,53 +28,57 @@ export const useTimeIncrements = (
       .map((_, i) =>
         pipe(new Date())(
           startOfDay,
-          pip(setHours)(timeStart),
-          pip(addMinutes)(i * timeDisplayIncrement)
+          pipable(setHours)(timeStart),
+          pipable(addMinutes)(i * timeDisplayIncrement)
         )
       );
-  }, []);
+  }, [timeStart, timeEnd, timeDisplayIncrement]);
 
-export const useNow = () => {
+export const useNow = (tick: number = 1000 * 60) => {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 1000);
+    const interval = setInterval(() => setNow(new Date()), tick);
     return () => clearInterval(interval);
   }, []);
   return now;
 };
 
-export const useCurrentTimePosition = (
-  days: Date[],
-  timeIncrements: Date[]
+export const useEventsByDay = (events: SchedulerEvent[], days: Date[]) =>
+  useMemo(() => {
+    return days.reduce((acc, day) => {
+      const key = day.toDateString();
+      const eventsForDay = events.filter(
+        (event) => isSameDay(event.start, day) && isSameDay(event.end, day)
+      );
+
+      return { ...acc, [key]: eventsForDay };
+    }, {} as Record<string, SchedulerEvent[]>);
+  }, [events, days]);
+
+export const useEventPositions = (
+  events: SchedulerEvent[],
+  [start, end]: [number, number],
+  increment: number
 ) => {
-  const gridRef = useRef<HTMLDivElement>(null!);
-  const now = useNow();
+  const minutesInDay = (end - start) * increment;
 
   return useMemo(() => {
-    const column = days.findIndex((day) =>
-      isEqual(startOfDay(day), startOfDay(now))
-    );
+    return events.reduce((acc, event) => {
+      const eventStartMinutes =
+        getTotalMinutes(event.start) - start * increment;
+      const eventEndMinutes = getTotalMinutes(event.end) - start * increment;
 
-    const bounds = gridRef.current?.getBoundingClientRect();
-    const cellWidth = bounds?.width / days.length;
-    const x = cellWidth * column;
+      const offset = (eventStartMinutes / minutesInDay) * 100;
+      const height =
+        ((eventEndMinutes - eventStartMinutes) / minutesInDay) * 100;
 
-    const totalDisplayedMinutes =
-      (timeIncrements.at(-1)?.getMinutes() ?? 0) -
-      (timeIncrements.at(0)?.getMinutes() ?? 0);
-    const minuteProgress =
-      (now.getMinutes() - (timeIncrements.at(0)?.getMinutes() ?? 0)) /
-      totalDisplayedMinutes;
-    const y = bounds?.height * minuteProgress;
-
-    return {
-      visible: column > 0,
-      x,
-      y,
-      width: cellWidth,
-      setGridRef: (el: HTMLDivElement) => {
-        gridRef.current = el;
-      },
-    };
-  }, [now]);
+      return {
+        ...acc,
+        [event.key]: {
+          top: `${offset}%`,
+          height: `${height}%`,
+        },
+      };
+    }, {} as Record<string, { top: string; height: string }>);
+  }, [events, start, end, increment]);
 };

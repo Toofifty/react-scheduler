@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { EventChipProps } from '../event-chip';
 
 export enum Day {
   Sunday = 0,
@@ -10,11 +11,48 @@ export enum Day {
   Saturday = 6,
 }
 
-export interface SchedulerEvent {
-  key: string;
-  chip: (/* some per-event state */) => JSX.Element;
-  popover: (/* some per-event state */) => JSX.Element;
+interface StaticChipEvent {
+  title: ReactNode;
 }
+
+interface CustomChipEvent {
+  renderChip: (props: Pick<EventChipProps, 'top' | 'height'>) => JSX.Element;
+}
+
+interface StaticPopoverEvent {
+  title: ReactNode;
+  description: ReactNode;
+}
+
+interface CustomPopoverEvent {
+  renderPopover: (props: Pick<any, 'top' | 'height'>) => JSX.Element;
+}
+
+interface EventMeta {
+  key: string;
+  start: Date;
+  end: Date;
+}
+
+export type SchedulerEvent = (StaticChipEvent | CustomChipEvent) &
+  (StaticPopoverEvent | CustomPopoverEvent) &
+  EventMeta;
+
+export const hasStaticChip = (
+  event: StaticChipEvent | CustomChipEvent
+): event is StaticChipEvent => 'title' in event;
+
+export const hasCustomChip = (
+  event: StaticChipEvent | CustomChipEvent
+): event is CustomChipEvent => 'renderChip' in event;
+
+export const hasStaticPopover = (
+  event: StaticPopoverEvent | CustomPopoverEvent
+): event is StaticPopoverEvent => 'description' in event;
+
+export const hasCustomPopover = (
+  event: StaticPopoverEvent | CustomPopoverEvent
+): event is CustomPopoverEvent => 'renderPopover' in event;
 
 export interface SchedulerProps {
   className?: string;

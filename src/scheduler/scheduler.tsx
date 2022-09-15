@@ -1,13 +1,22 @@
 import cx from 'classnames';
-import { differenceInMinutes, format, isEqual, startOfDay } from 'date-fns';
-import { Day, SchedulerProps } from './types';
 import {
-  useCurrentTimePosition,
+  differenceInMinutes,
+  format,
+  isEqual,
+  isToday,
+  startOfDay,
+} from 'date-fns';
+import { Day, hasCustomChip, SchedulerProps } from './types';
+import {
   useDaysOfWeek,
+  useEventPositions,
+  useEventsByDay,
   useTimeIncrements,
 } from './hooks';
 
 import './scheduler.scss';
+import { CurrentTime } from './components/current-time';
+import { EventChip } from '../event-chip';
 
 const defaultRenderDaytimeLabel = (time: Date, now: boolean) => (
   <div
@@ -42,25 +51,31 @@ export const Scheduler = ({
   view = 'week',
   start = new Date(),
   weekStartsOn = Day.Sunday,
-  daytimeRange = [7, 24],
-  daytimeDisplayIncrement = 61,
+  daytimeRange = [0, 24],
+  daytimeDisplayIncrement = 60,
+  daytimeInteractivityIncrement = 30,
   renderDaytimeLabel = defaultRenderDaytimeLabel,
   renderDayLabel = defaultRenderDayLabel,
   renderMonthLabel = defaultRenderMonthLabel,
 }: SchedulerProps) => {
   const days = useDaysOfWeek(start, weekStartsOn);
+
   const timeIncrements = useTimeIncrements(
     daytimeRange,
     daytimeDisplayIncrement
   );
 
-  const {
-    visible: nowIndicatorVisible,
-    x,
-    y,
-    width,
-    setGridRef,
-  } = useCurrentTimePosition(days, timeIncrements);
+  const interactiveTimeIncrements = useTimeIncrements(
+    daytimeRange,
+    daytimeInteractivityIncrement
+  );
+
+  const eventsByDay = useEventsByDay(events, days);
+  const eventPositions = useEventPositions(
+    events,
+    daytimeRange,
+    daytimeDisplayIncrement
+  );
 
   return (
     <div className={cx('scheduler', `scheduler--${view}`, className)}>
@@ -79,24 +94,48 @@ export const Scheduler = ({
           )
         )}
       </div>
-      <div className="scheduler__grid" ref={setGridRef}>
-        {timeIncrements.map((time) => (
-          <div className="scheduler__grid-row" key={time.toISOString()}>
-            {days.map((date) => (
-              <div className="scheduler__grid-cell" key={date.toISOString()} />
+      <div className="scheduler__grid">
+        {days.map((date) => (
+          <div className="scheduler__grid-column" key={date.toISOString()}>
+            {timeIncrements.map((time) => (
+              <div className="scheduler__grid-cell" key={time.toISOString()} />
             ))}
           </div>
         ))}
-        {nowIndicatorVisible && (
-          <div
-            className="scheduler__now"
-            style={{
-              left: `${x}px`,
-              top: `${y}px`,
-              width: `${width}px`,
-            }}
-          />
-        )}
+        <div className="scheduler__grid-interactive">
+          {days.map((date) => (
+            <div
+              className="scheduler__grid-interactive-column"
+              key={date.toISOString()}
+            >
+              {isToday(date) && (
+                <CurrentTime
+                  daytimeRange={daytimeRange}
+                  daytimeDisplayIncrement={daytimeDisplayIncrement}
+                />
+              )}
+              {interactiveTimeIncrements.map((time) => (
+                <div
+                  className="scheduler__grid-interactive-cell"
+                  key={time.toISOString()}
+                />
+              ))}
+              {eventsByDay[date.toDateString()].map((event) => {
+                const position = eventPositions[event.key];
+
+                if (hasCustomChip(event)) {
+                  return event.renderChip(position);
+                }
+
+                return (
+                  <EventChip key={event.key} {...position}>
+                    {event.title}
+                  </EventChip>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

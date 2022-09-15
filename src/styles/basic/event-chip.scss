@@ -1,0 +1,23 @@
+@import './var.scss';
+
+.scheduler__event-chip {
+  background: blueviolet;
+  opacity: 0.9;
+  border-radius: 4px;
+  border: 2px solid white;
+  color: white;
+  cursor: pointer;
+  padding: 0.25rem;
+
+  margin-left: 1px;
+  width: calc(100% - 1px);
+
+  font-size: xx-small;
+  font-weight: 100;
+
+  box-shadow: $shadow-200;
+
+  &:hover {
+    opacity: 1;
+  }
+}
